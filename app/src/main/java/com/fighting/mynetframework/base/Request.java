@@ -1,5 +1,7 @@
 package com.fighting.mynetframework.base;
 
+import android.util.Log;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -9,8 +11,8 @@ import java.util.Map;
  * 描述：
  * Created by MaJD on 2016/8/8.
  */
-
 public abstract class Request<T> implements Comparable<Request<T>> {
+
 
     public static enum HttpMethod {
         GET("GET"),
@@ -18,6 +20,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         PUT("PUT"),
         DELETE("DELETE");
 
+        /** http request type */
         private String mHttpMethod = "";
 
         private HttpMethod(String method) {
@@ -37,15 +40,24 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         IMMEDIATE
     }
 
-    private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
+
+    public static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
+
+    public final static String HEADER_CONTENT_TYPE = "Content-Type";
+
     protected int mSerialNum = 0;
+
     protected Priority mPriority = Priority.NORMAL;
+
     protected boolean isCancel = false;
 
     /** 该请求是否应该缓存 */
     private boolean mShouldCache = true;
+
     protected RequestListener<T> mRequestListener;
+
     private String mUrl = "";
+
     HttpMethod mHttpMethod = HttpMethod.GET;
 
     private Map<String, String> mHeaders = new HashMap<String, String>();
@@ -58,23 +70,34 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mRequestListener = listener;
     }
 
+    public void addHeader(String name, String value) {
+        mHeaders.put(name, value);
+    }
+
     /**
-     * 从原生的网络请求中解析结果,子类覆写
+     * 从原生的网络请求中解析结果
      */
     public abstract T parseResponse(Response response);
 
+    /**
+     * 处理Response,该方法运行在UI线程.
+     */
     public final void deliveryResponse(Response response) {
-        // 解析得到请求结果
         T result = parseResponse(response);
         if (mRequestListener != null) {
             int stCode = response != null ? response.getStatusCode() : -1;
             String msg = response != null ? response.getMessage() : "unkown error";
+            Log.e("", "### 执行回调 : stCode = " + stCode + ", result : " + result + ", err : " + msg);
             mRequestListener.onComplete(stCode, result, msg);
         }
     }
 
     public String getUrl() {
         return mUrl;
+    }
+
+    public RequestListener<T> getRequestListener() {
+        return mRequestListener;
     }
 
     public int getSerialNumber() {
@@ -113,6 +136,20 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         return mBodyParams;
     }
 
+    public boolean isHttps() {
+        return mUrl.startsWith("https");
+    }
+
+    /**
+     * 该请求是否应该缓存
+     */
+    public void setShouldCache(boolean shouldCache) {
+        this.mShouldCache = shouldCache;
+    }
+
+    public boolean shouldCache() {
+        return mShouldCache;
+    }
 
     public void cancel() {
         isCancel = true;
@@ -121,9 +158,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     public boolean isCanceled() {
         return isCancel;
     }
+
     /**
-     * 返回POST或者PUT请求时的Body参数字节数组
-     *
+     * Returns the raw POST or PUT body to be sent.
      */
     public byte[] getBody() {
         Map<String, String> params = getParams();
@@ -133,9 +170,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         return null;
     }
 
-    /**
-     * 将参数转换为Url编码的参数串
-     */
     private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
         StringBuilder encodedParams = new StringBuilder();
         try {
@@ -151,34 +185,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         }
     }
 
-
-    // 用于对请求的排序处理,根据优先级和加入到队列的序号进行排序
     @Override
     public int compareTo(Request<T> another) {
         Priority myPriority = this.getPriority();
         Priority anotherPriority = another.getPriority();
         // 如果优先级相等,那么按照添加到队列的序列号顺序来执行
-        return myPriority.equals(another) ? this.getSerialNumber() - another.getSerialNumber()
+        return myPriority.equals(anotherPriority) ? this.getSerialNumber()
+                - another.getSerialNumber()
                 : myPriority.ordinal() - anotherPriority.ordinal();
     }
 
-
     /**
-     * 网络请求Listener,会被执行在UI线程
+     * 网络请求Listener
      */
     public static interface RequestListener<T> {
-        /**
-         * 请求完成的回调
-         */
+
         void onComplete(int stCode, T response, String errMsg);
     }
-
-
-
-
-
-
-
-
-
 }

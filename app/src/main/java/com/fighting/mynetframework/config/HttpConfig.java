@@ -5,5 +5,8 @@ package com.fighting.mynetframework.config;
  * Created by MaJD on 2016/8/8.
  */
 
-public class HttpConfig {
+public abstract class HttpConfig {
+    public String userAgent = "default";
+    public int soTimeOut = 10000;
+    public int connTimeOut = 10000;
 }

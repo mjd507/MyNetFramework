@@ -5,5 +5,10 @@ package com.fighting.mynetframework.cache;
  * Created by MaJD on 2016/8/8.
  */
 
-public class Cache {
+public interface Cache<K, V> {
+    V get(K key);
+
+    void put(K key, V value);
+
+    void remove(K key);
 }
