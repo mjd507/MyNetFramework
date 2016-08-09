@@ -16,7 +16,7 @@ import java.io.IOException;
 public class Response extends BasicHttpResponse {
     private int statusCode;
     private String message;
-    private byte[] rawData = new byte[0];
+    public byte[] rawData = new byte[0];
 
     public Response(StatusLine statusline) {
         super(statusline);
