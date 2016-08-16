@@ -26,7 +26,7 @@ public class HttpClientConfig extends HttpConfig{
         mSslSocketFactory = sslSocketFactory;
     }
 
-    public SSLSocketFactory getSocketFactory() {
+    public org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory() {
         return mSslSocketFactory;
     }
 }
