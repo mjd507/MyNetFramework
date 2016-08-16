@@ -14,8 +14,6 @@ import java.io.IOException;
  */
 
 public class Response extends BasicHttpResponse {
-    private int statusCode;
-    private String message;
     public byte[] rawData = new byte[0];
 
     public Response(StatusLine statusline) {
@@ -25,18 +23,23 @@ public class Response extends BasicHttpResponse {
     public Response(ProtocolVersion ver, int code, String reason) {
         super(ver, code, reason);
     }
-
-    public int getStatusCode() {
-        return statusCode;
+    @Override
+    public void setEntity(HttpEntity entity) {
+        super.setEntity(entity);
+        rawData = entityToBytes(getEntity());
     }
-
-    public String getMessage() {
-        return message;
-    }
-
     public byte[] getRawData() {
         return rawData;
     }
+    public int getStatusCode() {
+        return getStatusLine().getStatusCode();
+    }
+
+    public String getMessage() {
+        return getStatusLine().getReasonPhrase();
+    }
+
+
 
     /**
      * Reads the contents of HttpEntity into a byte[].

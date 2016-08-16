@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
  * Created by MaJD on 2016/8/8.
  */
 
-public class NetworkExecutor extends Thread {
+final class NetworkExecutor extends Thread {
     private BlockingQueue<Request<?>> mRequestQueue;
     private HttpStack mHttpStack;
     private static ResponseDelivery mResponseDelivery = new ResponseDelivery();

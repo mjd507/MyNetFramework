@@ -1,6 +1,7 @@
 package com.fighting.mynetframework.config;
 
-import javax.net.ssl.SSLSocketFactory;
+
+import org.apache.http.conn.ssl.SSLSocketFactory;
 
 /**
  * 描述：
@@ -26,7 +27,7 @@ public class HttpClientConfig extends HttpConfig{
         mSslSocketFactory = sslSocketFactory;
     }
 
-    public org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory() {
+    public SSLSocketFactory getSocketFactory() {
         return mSslSocketFactory;
     }
 }
